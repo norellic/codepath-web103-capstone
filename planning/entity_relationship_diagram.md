@@ -10,6 +10,7 @@ Reference the Creating an Entity Relationship Diagram final project guide in the
 | userID | integer | primary key |
 | username | text | unique user alias |
 | password | text | login credential to access  |
+| points | integer | points accuraled from mastering habits |
 | timeCreated | timestamp | how long the user has been with the app |
 
 ** Habits Table **
@@ -17,6 +18,8 @@ Reference the Creating an Entity Relationship Diagram final project guide in the
 |-------------|------|-------------|
 | userID | integer | primary key |
 | habitName | text | habit to be tracked |
+| description | text | description of habit |
+| pointWeight | integer | how many points the user will recive from completing the habit |
 | frequency | integer | how frequent the user wants to do this habit |
 | duration | integer | how long the user wants to spend doing this habit   |
 | status | text | if the user has already created habit into a habit |
