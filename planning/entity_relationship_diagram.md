@@ -4,7 +4,22 @@ Reference the Creating an Entity Relationship Diagram final project guide in the
 
 ## Create the List of Tables
 
-[👉🏾👉🏾👉🏾 List each table in your diagram]
+** User Table **
+| Column Name | Type | Description |
+|-------------|------|-------------|
+| userID | integer | primary key |
+| username | text | unique user alias |
+| password | text | login credential to access  |
+| timeCreated | timestamp | how long the user has been with the app |
+
+** Habits Table **
+| Column Name | Type | Description |
+|-------------|------|-------------|
+| userID | integer | primary key |
+| habitName | text | habit to be tracked |
+| frequency | integer | how frequent the user wants to do this habit |
+| duration | integer | how long the user wants to spend doing this habit   |
+| status | text | if the user has already created habit into a habit |
 
 ## Add the Entity Relationship Diagram
 
