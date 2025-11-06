@@ -21,7 +21,7 @@ Habit tracking apps with a visual representation of progress – examples includ
 
 Frontend: React.js
 
-Backend: Render
+Backend: Render, Postgresql
 
 ## Features
 
