@@ -4,7 +4,9 @@
   "main": "server.js",
   "type": "module",
   "scripts": {
-    "start": "nodemon server.js"
+    "start": "npm run reset && nodemon --require dotenv/config server.js",
+    "build": "cd client && vite build",
+    "reset": "cd config && node --require dotenv/config reset.js"
   },
   "keywords": [],
   "author": "",
