@@ -47,4 +47,7 @@ Backend: Render, Postgresql
 
 ## Installation Instructions
 
-[instructions go here]
+- First git clone the repo
+- Once done npm install inside the client directory
+- npm run reset in the server directory
+- npm run dev in client directory
