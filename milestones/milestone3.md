@@ -16,26 +16,26 @@ You will need to reference the GitHub Project Management guide in the course por
   - [ ] Set the completion percentage of each milestone. The GitHub Milestone for this unit (Milestone 3 - Unit 7) should be 100% completed when you submit for full points.
 - [ ] In `readme.md`, check off the features you have completed in this unit by adding a ✅ emoji in front of the feature's name.
 	- [ ] Under each feature you have completed, include a GIF showing feature functionality.
-- [ ] In this documents, complete all five questions in the **Reflection** section below.
+- [x] In this documents, complete all five questions in the **Reflection** section below.
 
 ## Reflection
 
 ### 1. What went well during this unit?
 
-[👉🏾👉🏾👉🏾 your answer here]
+Setting up a clear project management structure went well. Our group established an organized workflow and communication plan, which helped everyone stay on the same page and understand their responsibilities.
 
 ### 2. What were some challenges your group faced in this unit?
 
-[👉🏾👉🏾👉🏾 your answer here]
+A major challenge was organizing the project into smaller, manageable issues that could be assigned to individual members. Many components of the project are interconnected, which made it difficult to isolate tasks without affecting others.
 
 ### Did you finish all of your tasks in your sprint plan for this week? If you did not finish all of the planned tasks, how would you prioritize the remaining tasks on your list?
 
-[👉🏾👉🏾👉🏾 your answer here]
+Yes, we completed all of our planned tasks for the week. Our tasks were primarily setup-based, including establishing the project structure, installing dependencies, rendering the database, and creating a solid project plan.
 
 ### Which features and user stories would you consider “at risk”? How will you change your plan if those items remain “at risk”?
 
-[👉🏾👉🏾👉🏾 your answer here]
+The image upload feature and implementation of more custom art are currently “at risk.” If we run short on time, we’ll prioritize completing our core features first and leave these as stretch goals to revisit later if time permits.
 
 ### 5. What additional support will you need in upcoming units as you continue to work on your final project?
 
-[👉🏾👉🏾👉🏾 your answer here]
+None at this time as our team feels confident moving forward with the current plan and structure.
