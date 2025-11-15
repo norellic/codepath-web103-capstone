@@ -9,24 +9,28 @@ export default function HabitDetail() {
   // habit passed from Habits.jsx navigate(`/habit/${h.id}`, { state: { habit: h } })
   const habit = state?.habit;
 
+  const [minutesInput, setMinutesInput] = useState("20"); // default 20
+
   if (!habit) {
-    // This happens if someone refreshes on /habit/:id
     return (
       <div style={{ padding: "20px" }}>
         <h1>Habit not found</h1>
-        <p>
-          Try going back to the Habits page and clicking the habit again – this
-          page expects the habit data to be passed in.
-        </p>
         <button onClick={() => navigate("/habits")}>Back to Habits</button>
       </div>
     );
   }
 
-  // timer minutes state
-  const [minutes, setMinutes] = useState(20);
 
+  // timer minutes state
   const handleStart = () => {
+    // convert string -> number ONLY when starting
+    const minutes = parseInt(minutesInput, 10);
+
+    if (!minutes || minutes <= 0) {
+      alert("Please enter a valid number of minutes.");
+      return;
+    }
+
     navigate(`/habit/${habit.id}/timer`, {
       state: { habit, minutes },
     });
@@ -48,8 +52,8 @@ export default function HabitDetail() {
 
       <input
         type="number"
-        value={minutes}
-        onChange={(e) => setMinutes(Number(e.target.value))}
+        value={minutesInput}
+        onChange={(e) => setMinutesInput(e.target.value)}
         style={{ width: "100px", marginBottom: "10px" }}
       />
 
