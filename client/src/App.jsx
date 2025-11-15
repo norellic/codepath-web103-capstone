@@ -1,6 +1,7 @@
 import { Routes, Route, Link } from 'react-router-dom';
 import Home from './pages/Home';
 import Habits from './pages/Habits';
+import HabitDetail from "./pages/HabitDetail.jsx";
 import StickerGallery from './pages/StickerGallery';
 
 const App = () => {
@@ -24,6 +25,7 @@ const App = () => {
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/habits" element={<Habits />} />
+        <Route path="/habit/:id" element={<HabitDetail />} />
         <Route path="/stickerGallery" element={<StickerGallery />} />
       </Routes>
     </div>

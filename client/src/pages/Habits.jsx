@@ -1,6 +1,10 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+
 
 export default function Habits() {
+  const navigate = useNavigate();
+
   const [habits, setHabits] = useState([]);
   const [showForm, setShowForm] = useState(false);
   const [form, setForm] = useState({ title: "", description: "" });
@@ -65,10 +69,20 @@ export default function Habits() {
       <ul>
         {habits.length === 0 && <li>No habits yet.</li>}
         {habits.map((h) => (
-          <li key={h.id}>
-            <strong>{h.title}</strong> – {h.description || "No description"}  
+          <li 
+            key={h.id}
+            onClick={() => navigate(`/habit/${h.id}`, { state: { habit: h } })}
+            style={{
+              padding: "10px",
+              margin: "10px 0",
+              border: "1px solid #ccc",
+              borderRadius: "5px",
+              cursor: "pointer",
+            }}
+          >
+            <strong>{h.title}</strong> – {h.description || "No description"}
             <br />
-            Created: {h.created_at}
+            <small>Created: {h.created_at}</small>
           </li>
         ))}
       </ul>
