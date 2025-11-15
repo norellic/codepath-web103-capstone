@@ -1,3 +1,4 @@
+// client/src/App.jsx
 import { Routes, Route, Link } from "react-router-dom";
 import Home from "./pages/Home.jsx";
 import Habits from "./pages/Habits.jsx";
@@ -8,7 +9,7 @@ import StickerGallery from "./pages/StickerGallery.jsx";
 import { useUser } from "./UserContext.jsx";
 
 function Header() {
-  const { user } = useUser();
+  const { points } = useUser();
 
   return (
     <header
@@ -34,13 +35,14 @@ function Header() {
         </Link>
       </nav>
 
-      {/* Points display */}
+      {/* Points display (THE ONLY ONE) */}
       <div style={{ fontWeight: "bold" }}>
-        Points: {user?.points ?? 0}
+        Points: {points}
       </div>
     </header>
   );
 }
+
 
 export default function App() {
   return (

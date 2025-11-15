@@ -12,7 +12,7 @@ export default function Habits() {
   useEffect(() => {
     async function fetchHabits() {
       try {
-        const res = await fetch("/api/habits");
+        const res = await fetch("http://localhost:3001/api/habits");
         const data = await res.json();
         setHabits(data);
       } catch (err) {
@@ -33,9 +33,9 @@ export default function Habits() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!form.title.trim()) return alert("Please enter a title.");
-
+  
     try {
-      const res = await fetch("/api/habits", {
+      const res = await fetch("http://localhost:3001/api/habits", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -43,12 +43,13 @@ export default function Habits() {
           description: form.description,
         }),
       });
-
+  
       if (!res.ok) {
         const errData = await res.json().catch(() => ({}));
-        return alert(errData.error || "Failed to create habit");
+        alert(errData.error || "Failed to create habit");   
+        return;
       }
-
+  
       const newHabit = await res.json();
       setHabits((prev) => [newHabit, ...prev]);
       setForm({ title: "", description: "" });
@@ -58,6 +59,7 @@ export default function Habits() {
       alert("Something went wrong creating the habit.");
     }
   };
+  
 
   if (loading) {
     return <div style={{ padding: "20px" }}>Loading habits...</div>;

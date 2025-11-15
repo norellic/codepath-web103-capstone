@@ -1,22 +1,24 @@
-import express from 'express'
-import './config/dotenv.js'
-import cors from 'cors'
+// server/server.js
+import "dotenv/config";
+import express from "express";
+import cors from "cors";
 import { pool as db } from "./config/database.js";
+import { initDb } from "./db/init.js";
 
-const app = express()
+const app = express();
 
-app.use(cors())
+app.use(cors());
 app.use(express.json());
 
-const PORT = process.env.PORT || 3001
+const PORT = process.env.PORT || 3001;
 
-// HABITS CRUD
+// ===== HABITS CRUD =====
 
 // GET all habits
 app.get("/api/habits", async (req, res) => {
   try {
     const result = await db.query(
-      "SELECT id, user_id, title, description, created_at FROM habits ORDER BY id DESC"
+      "SELECT id, user_id, title, description FROM habits ORDER BY id DESC"
     );
     res.json(result.rows);
   } catch (err) {
@@ -33,30 +35,31 @@ app.post("/api/habits", async (req, res) => {
     return res.status(400).json({ error: "Title is required" });
   }
 
-  // TEMP: fake logged in user
+  // demo user id = 1 (reset.js seeds a user)
   const effectiveUserId = user_id ?? 1;
 
   try {
     const result = await db.query(
-      `INSERT INTO habits (user_id, title, description, created_at)
-       VALUES ($1, $2, $3, NOW())
-       RETURNING id, user_id, title, description, created_at`,
-      [effectiveUserId, title.trim(), description || ""]
+      `INSERT INTO habits (user_id, title, description)
+       VALUES ($1, $2, $3)
+       RETURNING id, user_id, title, description`,
+      [effectiveUserId, title.trim(), description || null]
     );
-    res.status(201).json(result.rows[0]);
+
+    return res.status(201).json(result.rows[0]);
   } catch (err) {
-    console.error("Error creating habit:", err);
-    res.status(500).json({ error: "Failed to create habit" });
+    console.error("Error creating habit:", err);          // shows full error in terminal
+    return res.status(500).json({ error: err.message });  // send exact DB error to frontend
   }
 });
 
-// GET single habit
+// GET single habit by id
 app.get("/api/habits/:id", async (req, res) => {
   const { id } = req.params;
 
   try {
     const result = await db.query(
-      "SELECT id, user_id, title, description, created_at FROM habits WHERE id = $1",
+      "SELECT id, user_id, title, description FROM habits WHERE id = $1",
       [id]
     );
 
@@ -84,21 +87,22 @@ app.delete("/api/habits/:id", async (req, res) => {
       return res.status(404).json({ error: "Habit not found" });
     }
 
-    return res.status(204).end(); // success, no content
+    return res.status(204).end();
   } catch (err) {
     console.error("Error deleting habit:", err);
     return res.status(500).json({ error: "Failed to delete habit" });
   }
 });
 
-// TIMER COMPLETE -> POINTS 
+// ===== TIMER COMPLETE -> POINTS =====
 
 app.post("/api/habits/:id/complete", async (req, res) => {
   const habitId = req.params.id;
   const { minutes } = req.body;
 
-  // TEMP: fake logged in user
-  const userId = 1;
+  const userId = 1; // demo user
+
+  console.log("complete called for habit", habitId, "minutes:", minutes);
 
   try {
     const pointsEarned = Number(minutes) || 0;
@@ -108,31 +112,48 @@ app.post("/api/habits/:id/complete", async (req, res) => {
         .json({ error: "Timer minutes must be a positive number." });
     }
 
-    // ensure habit exists 
+    // habit must exist
     const habitResult = await db.query(
       "SELECT id FROM habits WHERE id = $1",
       [habitId]
     );
     if (habitResult.rows.length === 0) {
+      console.log("Habit not found for id:", habitId);
       return res.status(404).json({ error: "Habit not found" });
     }
 
+    // update user points
     const userResult = await db.query(
-      "UPDATE users SET points = points + $1 WHERE id = $2 RETURNING points",
+      "UPDATE users SET points = COALESCE(points, 0) + $1 WHERE id = $2 RETURNING points",
       [pointsEarned, userId]
     );
 
+    if (userResult.rows.length === 0) {
+      console.log("User not found for id:", userId);
+      return res.status(404).json({ error: "User not found" });
+    }
+
     const totalPoints = userResult.rows[0].points;
 
-    res.json({ pointsEarned, totalPoints });
+    return res.json({ pointsEarned, totalPoints });
   } catch (err) {
     console.error("Error completing habit:", err);
-    res.status(500).json({ error: "Failed to complete habit" });
+    return res.status(500).json({ error: "Failed to complete habit" });
   }
 });
 
+// ===== START SERVER AFTER DB INIT =====
 
+async function start() {
+  try {
+    await initDb(); // ensures tables + demo user
+    app.listen(PORT, () => {
+      console.log(`🚀 Server listening on http://localhost:${PORT}`);
+    });
+  } catch (err) {
+    console.error("Fatal startup error:", err);
+    process.exit(1);
+  }
+}
 
-app.listen(PORT, () => {
-  console.log(`🚀 Server listening on http://localhost:${PORT}`)
-})
+start();
