@@ -4,11 +4,58 @@ import { useNavigate } from "react-router-dom";
 export default function Habits() {
   const navigate = useNavigate();
 
+
+  //habit + form states
   const [habits, setHabits] = useState([]);
   const [showForm, setShowForm] = useState(false);
   const [form, setForm] = useState({ title: "", description: "" });
   const [loading, setLoading] = useState(true);
 
+  //tags states
+  const [tagInput, setTagInput] = useState("");
+  const [selectedTags, setSelectedTags] = useState([]);
+  const [allTags, setAllTags] = useState([]);
+
+  //fetch all user tags
+  useEffect(() => {
+    async function fetchTags() {
+      const res = await fetch("http://localhost:3001/api/tags");
+      const data = await res.json();
+      setAllTags(data);
+    }
+    fetchTags();
+  }, []);
+
+  //add tag to tags list
+  const handleTagKeyDown = (e) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      if (!tagInput.trim()) return;
+  
+      const cleaned = tagInput.trim().toLowerCase();
+  
+      if (!selectedTags.includes(cleaned)) {
+        setSelectedTags(prev => [...prev, cleaned]);
+      }
+      setTagInput("");
+    }
+  };
+
+  //click to remove tag
+  const removeTag = (tag) => {
+    setSelectedTags(prev => prev.filter(t => t !== tag));
+  };
+
+  //select from pre-existing tags
+  const toggleExistingTag = (tagName) => {
+    if (selectedTags.includes(tagName)) {
+      setSelectedTags(prev => prev.filter(t => t !== tagName));
+    } else {
+      setSelectedTags(prev => [...prev, tagName]);
+    }
+  };
+
+  //fetch all habits
   useEffect(() => {
     async function fetchHabits() {
       try {
@@ -25,6 +72,7 @@ export default function Habits() {
     fetchHabits();
   }, []);
 
+  //habit form functionality
   const handleChange = (e) => {
     const { name, value } = e.target;
     setForm((prev) => ({ ...prev, [name]: value }));
@@ -41,6 +89,7 @@ export default function Habits() {
         body: JSON.stringify({
           title: form.title,
           description: form.description,
+          tags: selectedTags
         }),
       });
   
@@ -52,6 +101,7 @@ export default function Habits() {
   
       const newHabit = await res.json();
       setHabits((prev) => [newHabit, ...prev]);
+      setSelectedTags([]);
       setForm({ title: "", description: "" });
       setShowForm(false);
     } catch (err) {
@@ -65,6 +115,7 @@ export default function Habits() {
     return <div style={{ padding: "20px" }}>Loading habits...</div>;
   }
 
+  //habit form
   return (
     <div style={{ padding: "20px" }}>
       <h1>Your Habits</h1>
@@ -98,6 +149,53 @@ export default function Habits() {
                 placeholder="Optional description"
               />
             </label>
+
+            <label>
+              Tags:
+              <input
+                value={tagInput}
+                onChange={(e) => setTagInput(e.target.value)}
+                onKeyDown={handleTagKeyDown}
+                placeholder="Type a tag and press Enter"
+              />
+            </label>
+
+            <div style={{ marginTop: "10px", display: "flex", gap: "8px", flexWrap: "wrap" }}>
+              {selectedTags.map(tag => (
+                <span
+                  key={tag}
+                  style={{
+                    padding: "5px 10px",
+                    background: "#ddd",
+                    borderRadius: "15px",
+                    cursor: "pointer"
+                  }}
+                  onClick={() => removeTag(tag)}
+                >
+                  {tag} ×
+                </span>
+              ))}
+            </div>
+
+            {/* this is the tags functionality*/}
+            <h4>Available Tags</h4>
+            <div style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
+              {allTags.map(tag => (
+                <span
+                  key={tag.id}
+                  onClick={() => toggleExistingTag(tag.name)}
+                  style={{
+                    padding: "5px 10px",
+                    borderRadius: "15px",
+                    cursor: "pointer",
+                    background: selectedTags.includes(tag.name) ? "#90ee90" : "#eee"
+                  }}
+                >
+                  {tag.name}
+                </span>
+              ))}
+            </div>
+
             <br />
             <button type="submit">Create</button>
             <button type="button" onClick={() => setShowForm(false)}>
@@ -107,6 +205,7 @@ export default function Habits() {
         </div>
       )}
 
+      {/* this displays previous habits*/}
       <ul style={{ listStyle: "none", padding: 0 }}>
         {habits.length === 0 && <li>No habits yet.</li>}
 

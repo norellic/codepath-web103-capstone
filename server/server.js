@@ -12,6 +12,25 @@ app.use(express.json());
 
 const PORT = process.env.PORT || 3001;
 
+// ===== TAGS CRUD =====
+
+// GET all tags
+app.get("/api/tags", async (req, res) => {
+  const result = await db.query("SELECT * FROM tags ORDER BY name ASC");
+  res.json(result.rows);
+});
+
+// GET tags for a particular habit
+app.get("/api/tags/:id", async (req, res) => { 
+  const { id } = req.params;
+  const result = await db.query(`
+  SELECT tags.id, tags.name 
+  FROM tags 
+  JOIN habit_tags ON tags.id = habit_tags.tag_id
+  WHERE habit_id = $1`, [id]);
+  res.json(result.rows)
+});
+
 // ===== HABITS CRUD =====
 
 // GET all habits
@@ -27,31 +46,70 @@ app.get("/api/habits", async (req, res) => {
   }
 });
 
-// CREATE habit
+// CREATE habit (with tags)
 app.post("/api/habits", async (req, res) => {
-  const { title, description, user_id } = req.body;
+  const { title, description, user_id, tags } = req.body;
 
   if (!title || !title.trim()) {
     return res.status(400).json({ error: "Title is required" });
   }
 
-  // demo user id = 1 (reset.js seeds a user)
+  // fallback to demo user 1
   const effectiveUserId = user_id ?? 1;
 
   try {
-    const result = await db.query(
+    // 1. create habit
+    const habitResult = await db.query(
       `INSERT INTO habits (user_id, title, description)
        VALUES ($1, $2, $3)
        RETURNING id, user_id, title, description`,
       [effectiveUserId, title.trim(), description || null]
     );
 
-    return res.status(201).json(result.rows[0]);
+    const habit = habitResult.rows[0];
+
+    // 2. If no tags, return early
+    if (!tags || tags.length === 0) {
+      return res.status(201).json(habit);
+    }
+
+    // 3. Insert tags (create if not exists)
+    const tagIds = [];
+
+    for (const tagName of tags) {
+      const tagResult = await db.query(
+        `INSERT INTO tags (name)
+         VALUES ($1)
+         ON CONFLICT (name)
+         DO UPDATE SET name = EXCLUDED.name
+         RETURNING id`,
+        [tagName]
+      );
+      tagIds.push(tagResult.rows[0].id);
+    }
+
+    // 4. Insert habit_tags relational entries
+    for (const tagId of tagIds) {
+      await db.query(
+        `INSERT INTO habit_tags (habit_id, tag_id)
+         VALUES ($1, $2)
+         ON CONFLICT DO NOTHING`,
+        [habit.id, tagId]
+      );
+    }
+
+    // 5. Return habit with tags
+    return res.status(201).json({
+      ...habit,
+      tags: tagIds,
+    });
+
   } catch (err) {
-    console.error("Error creating habit:", err);          // shows full error in terminal
-    return res.status(500).json({ error: err.message });  // send exact DB error to frontend
+    console.error("Error creating habit:", err);
+    return res.status(500).json({ error: err.message });
   }
 });
+
 
 // GET single habit by id
 app.get("/api/habits/:id", async (req, res) => {
