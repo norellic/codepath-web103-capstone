@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import HabitForm from "./HabitForm";
 
 export default function Habits() {
   const navigate = useNavigate();
-
 
   //habit + form states
   const [habits, setHabits] = useState([]);
@@ -26,35 +26,6 @@ export default function Habits() {
     fetchTags();
   }, []);
 
-  //add tag to tags list
-  const handleTagKeyDown = (e) => {
-    if (e.key === "Enter") {
-      e.preventDefault();
-      if (!tagInput.trim()) return;
-  
-      const cleaned = tagInput.trim().toLowerCase();
-  
-      if (!selectedTags.includes(cleaned)) {
-        setSelectedTags(prev => [...prev, cleaned]);
-      }
-      setTagInput("");
-    }
-  };
-
-  //click to remove tag
-  const removeTag = (tag) => {
-    setSelectedTags(prev => prev.filter(t => t !== tag));
-  };
-
-  //select from pre-existing tags
-  const toggleExistingTag = (tagName) => {
-    if (selectedTags.includes(tagName)) {
-      setSelectedTags(prev => prev.filter(t => t !== tagName));
-    } else {
-      setSelectedTags(prev => [...prev, tagName]);
-    }
-  };
-
   //fetch all habits
   useEffect(() => {
     async function fetchHabits() {
@@ -72,43 +43,72 @@ export default function Habits() {
     fetchHabits();
   }, []);
 
-  //habit form functionality
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setForm((prev) => ({ ...prev, [name]: value }));
-  };
+  // //add tag to tags list
+  // const handleTagKeyDown = (e) => {
+  //   if (e.key === "Enter") {
+  //     e.preventDefault();
+  //     if (!tagInput.trim()) return;
+  
+  //     const cleaned = tagInput.trim().toLowerCase();
+  
+  //     if (!selectedTags.includes(cleaned)) {
+  //       setSelectedTags(prev => [...prev, cleaned]);
+  //     }
+  //     setTagInput("");
+  //   }
+  // };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (!form.title.trim()) return alert("Please enter a title.");
+  // //click to remove tag
+  // const removeTag = (tag) => {
+  //   setSelectedTags(prev => prev.filter(t => t !== tag));
+  // };
+
+  // //select from pre-existing tags
+  // const toggleExistingTag = (tagName) => {
+  //   if (selectedTags.includes(tagName)) {
+  //     setSelectedTags(prev => prev.filter(t => t !== tagName));
+  //   } else {
+  //     setSelectedTags(prev => [...prev, tagName]);
+  //   }
+  // };
   
-    try {
-      const res = await fetch("http://localhost:3001/api/habits", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          title: form.title,
-          description: form.description,
-          tags: selectedTags
-        }),
-      });
+  // //habit form functionality
+  // const handleChange = (e) => {
+  //   const { name, value } = e.target;
+  //   setForm((prev) => ({ ...prev, [name]: value }));
+  // };
+
+  // const handleSubmit = async (e) => {
+  //   e.preventDefault();
+  //   if (!form.title.trim()) return alert("Please enter a title.");
   
-      if (!res.ok) {
-        const errData = await res.json().catch(() => ({}));
-        alert(errData.error || "Failed to create habit");   
-        return;
-      }
+  //   try {
+  //     const res = await fetch("http://localhost:3001/api/habits", {
+  //       method: "POST",
+  //       headers: { "Content-Type": "application/json" },
+  //       body: JSON.stringify({
+  //         title: form.title,
+  //         description: form.description,
+  //         tags: selectedTags
+  //       }),
+  //     });
   
-      const newHabit = await res.json();
-      setHabits((prev) => [newHabit, ...prev]);
-      setSelectedTags([]);
-      setForm({ title: "", description: "" });
-      setShowForm(false);
-    } catch (err) {
-      console.error("Error creating habit", err);
-      alert("Something went wrong creating the habit.");
-    }
-  };
+  //     if (!res.ok) {
+  //       const errData = await res.json().catch(() => ({}));
+  //       alert(errData.error || "Failed to create habit");   
+  //       return;
+  //     }
+  
+  //     const newHabit = await res.json();
+  //     setHabits((prev) => [newHabit, ...prev]);
+  //     setSelectedTags([]);
+  //     setForm({ title: "", description: "" });
+  //     setShowForm(false);
+  //   } catch (err) {
+  //     console.error("Error creating habit", err);
+  //     alert("Something went wrong creating the habit.");
+  //   }
+  // };
   
 
   if (loading) {
@@ -125,6 +125,40 @@ export default function Habits() {
         +
       </button>
 
+      {showForm && (
+        <div style={{ marginBottom: "20px" }}>
+          <h2>Create Habit</h2>
+          <HabitForm
+            allTags={allTags}
+            onSubmit={async (data) => {
+              try {
+                const res = await fetch("http://localhost:3001/api/habits", {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify(data),
+                });
+
+                if (!res.ok) {
+                  const errData = await res.json().catch(() => ({}));
+                  alert(errData.error || "Failed to create habit");   
+                  return;
+                }
+
+                const newHabit = await res.json();
+                setHabits(prev => [newHabit, ...prev]);
+                setShowForm(false);
+              } catch (err) {
+                console.error("Error creating habit", err);
+                alert("Something went wrong creating the habit.");
+              }
+            }}
+            onCancel={() => setShowForm(false)}
+          />
+        </div>
+      )}
+
+
+    { /*
       {showForm && (
         <div style={{ marginBottom: "20px" }}>
           <h2>Create Habit</h2>
@@ -177,7 +211,6 @@ export default function Habits() {
               ))}
             </div>
 
-            {/* this is the tags functionality*/}
             <h4>Available Tags</h4>
             <div style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
               {allTags.map(tag => (
@@ -204,6 +237,7 @@ export default function Habits() {
           </form>
         </div>
       )}
+      */ }
 
       {/* this displays previous habits*/}
       <ul style={{ listStyle: "none", padding: 0 }}>
