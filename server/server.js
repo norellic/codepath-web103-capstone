@@ -4,6 +4,9 @@ import express from "express";
 import cors from "cors";
 import { pool as db } from "./config/database.js";
 import { initDb } from "./db/init.js";
+import storeRoutes from "./routes/storeRoutes.js";
+import "dotenv/config";
+
 
 const app = express();
 
@@ -35,8 +38,7 @@ app.post("/api/habits", async (req, res) => {
     return res.status(400).json({ error: "Title is required" });
   }
 
-  // demo user id = 1 (reset.js seeds a user)
-  const effectiveUserId = user_id ?? 1;
+  const effectiveUserId = user_id ?? 1; // demo user id
 
   try {
     const result = await db.query(
@@ -48,8 +50,8 @@ app.post("/api/habits", async (req, res) => {
 
     return res.status(201).json(result.rows[0]);
   } catch (err) {
-    console.error("Error creating habit:", err);          // shows full error in terminal
-    return res.status(500).json({ error: err.message });  // send exact DB error to frontend
+    console.error("Error creating habit:", err);
+    return res.status(500).json({ error: err.message });
   }
 });
 
@@ -141,6 +143,9 @@ app.post("/api/habits/:id/complete", async (req, res) => {
     return res.status(500).json({ error: "Failed to complete habit" });
   }
 });
+
+// ===== STICKER STORE ROUTES =====
+app.use("/api", storeRoutes);
 
 // ===== START SERVER AFTER DB INIT =====
 
