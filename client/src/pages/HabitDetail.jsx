@@ -96,7 +96,9 @@ export default function HabitDetails() {
           Start Timer
         </button>
 
-        <button /* onClick={...edit later} */>Edit</button>
+        <button onClick={() => navigate(`/habit/${id}/edit`)}>
+          Edit
+        </button>
 
         <button
           onClick={handleDelete}

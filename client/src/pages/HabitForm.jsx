@@ -7,9 +7,9 @@ export default function HabitForm({
   onSubmit, 
   onCancel 
 }) {
-  const [form, setForm] = useState({ 
+  const [form, setForm] = useState({
     title: initialValues.title, 
-    description: initialValues.description 
+    description: initialValues.description
   });
   const [selectedTags, setSelectedTags] = useState(initialValues.tags || []);
   const [tagInput, setTagInput] = useState("");
@@ -100,21 +100,23 @@ export default function HabitForm({
 
       <h4>Available Tags</h4>
       <div style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
-        {allTags.map(tag => (
-          <span
+        {allTags.map((tag) => (
+            <span
             key={tag.id}
             onClick={() => toggleExistingTag(tag.name)}
             style={{
-              padding: "5px 10px",
-              borderRadius: "15px",
-              cursor: "pointer",
-              background: selectedTags.includes(tag.name) ? "#90ee90" : "#eee"
+                padding: "5px 10px",
+                borderRadius: "15px",
+                cursor: "pointer",
+                background: selectedTags.includes(tag.name)
+                ? "#90ee90" // green if selected
+                : "#eee",
             }}
-          >
+            >
             {tag.name}
-          </span>
+            </span>
         ))}
-      </div>
+        </div>
 
       <br />
       <button type="submit">Save</button>

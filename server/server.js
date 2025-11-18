@@ -20,7 +20,7 @@ app.get("/api/tags", async (req, res) => {
   res.json(result.rows);
 });
 
-// GET tags for a particular habit
+// GET tags for a habit id
 app.get("/api/tags/:id", async (req, res) => { 
   const { id } = req.params;
   const result = await db.query(`
@@ -46,7 +46,7 @@ app.get("/api/habits", async (req, res) => {
   }
 });
 
-// CREATE habit (with tags)
+// CREATE habit + habit's tags
 app.post("/api/habits", async (req, res) => {
   const { title, description, user_id, tags } = req.body;
 
@@ -131,6 +131,43 @@ app.get("/api/habits/:id", async (req, res) => {
     res.status(500).json({ error: "Failed to fetch habit" });
   }
 });
+
+// UPDATE habit
+app.put("/api/habits/:id", async (req, res) => {
+  const { title, description, tags } = req.body;
+  const { id } = req.params;
+
+  try {
+    // update habit
+    await db.query(
+      "UPDATE habits SET title=$1, description=$2 WHERE id=$3",
+      [title, description, id]
+    );
+
+    // delete old tags
+    await db.query("DELETE FROM habit_tags WHERE habit_id=$1", [id]);
+
+    // insert new tags
+    for (let tagName of tags) {
+      // insert tag if not exists
+      const tagRes = await db.query(
+        "INSERT INTO tags(name) VALUES($1) ON CONFLICT (name) DO UPDATE SET name=EXCLUDED.name RETURNING id",
+        [tagName]
+      );
+      const tagId = tagRes.rows[0].id;
+      await db.query(
+        "INSERT INTO habit_tags(habit_id, tag_id) VALUES($1, $2) ON CONFLICT DO NOTHING",
+        [id, tagId]
+      );
+    }
+
+    res.json({ id, title, description });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
 
 // DELETE habit
 app.delete("/api/habits/:id", async (req, res) => {

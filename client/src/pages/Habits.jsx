@@ -8,12 +8,9 @@ export default function Habits() {
   //habit + form states
   const [habits, setHabits] = useState([]);
   const [showForm, setShowForm] = useState(false);
-  const [form, setForm] = useState({ title: "", description: "" });
   const [loading, setLoading] = useState(true);
 
   //tags states
-  const [tagInput, setTagInput] = useState("");
-  const [selectedTags, setSelectedTags] = useState([]);
   const [allTags, setAllTags] = useState([]);
 
   //fetch all user tags
