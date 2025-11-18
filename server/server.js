@@ -31,6 +31,32 @@ app.get("/api/tags/:id", async (req, res) => {
   res.json(result.rows)
 });
 
+// GET all habits for a tag id
+app.get("/api/habits/by-tag/:tagName", async (req, res) => {
+  const { tagName } = req.params;
+
+  try {
+    const result = await db.query(
+      `
+      SELECT h.*
+      FROM habits h
+      JOIN habit_tags ht ON h.id = ht.habit_id
+      JOIN tags t ON t.id = ht.tag_id
+      WHERE t.name = $1
+      ORDER BY h.id DESC
+      `,
+      [tagName]
+    );
+
+    res.json(result.rows); // array
+  } catch (err) {
+    console.error("Error fetching habits by tag:", err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+
+
 // ===== HABITS CRUD =====
 
 // GET all habits

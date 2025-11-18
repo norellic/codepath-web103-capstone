@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import HabitForm from "./HabitForm";
+import HabitForm from "../components/HabitForm";
 
 export default function EditHabit() {
   const { id } = useParams(); // habit id from URL
