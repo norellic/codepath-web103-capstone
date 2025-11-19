@@ -85,17 +85,22 @@ export default function StickerGallery() {
 
       {stickers.length === 0 && <p>No stickers available.</p>}
 
-      <ul>
+      <ul className="sticker-grid">
         {stickers.map((s) => (
-          <li key={s.id}>
+          <li key={s.id} className="sticker-card">
             {s.image_url && (
-              <img src={s.image_url} alt={s.name} width="72" height="72" />
+              <img src={s.image_url} alt={s.name} />
             )}
-            <div>
-              <strong>{s.name}</strong> — ${s.price}
-            </div>
-            <button onClick={() => handlePurchase(s.id)}>Purchase</button>
-            <hr />
+
+            <strong>{s.name}</strong>
+            <p>${s.price}</p>
+
+            <button
+              className="purchase-btn"
+              onClick={() => handlePurchase(s.id)}
+            >
+              Purchase
+            </button>
           </li>
         ))}
       </ul>

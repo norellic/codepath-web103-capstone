@@ -6,26 +6,18 @@ export default function Home() {
 
   return (
     <div>
-      <h1>Home</h1>
-      <p>Current points: {points}</p>
+      <h1>Welcome Back!</h1>
+      <p>Your purchased stickers:</p>
 
-      <h2>Purchased Stickers</h2>
-      {purchasedStickers.length === 0 ? (
-        <p>You haven't purchased any stickers yet.</p>
-      ) : (
-        <ul>
-          {purchasedStickers.map((s) => (
-            <li key={s.id}>
-              {s.image_url && (
-                <img src={s.image_url} alt={s.name} width="48" height="48" />
-              )}
-              <span>
-                {s.name} — ${s.price}
-              </span>
-            </li>
-          ))}
-        </ul>
-      )}
+      <div className="purchased-stickers">
+        {purchasedStickers.length === 0 ? (
+          <p>You haven't bought any stickers yet.</p>
+        ) : (
+          purchasedStickers.map((s) => (
+            <img key={s.id} src={s.image_url} alt={s.name} />
+          ))
+        )}
+      </div>
     </div>
   );
 }
