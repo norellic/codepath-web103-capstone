@@ -109,7 +109,7 @@ const reset = async () => {
       VALUES ('demo', '$2b$10$examplehash', 0)
       ON CONFLICT DO NOTHING;
 
-      INSERT INTO tags (name) VALUES ('sample') ON CONFLICT DO NOTHING;
+      INSERT INTO tags (name) VALUES ('edit this tag') ON CONFLICT DO NOTHING;
       INSERT INTO stickers (name, price, image_url)
       VALUES ('Sample Sticker', 10, NULL) ON CONFLICT DO NOTHING;
     `);

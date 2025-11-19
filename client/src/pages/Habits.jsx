@@ -251,6 +251,11 @@ export default function Habits() {
                 const newHabit = await res.json();
                 setHabits(prev => [newHabit, ...prev]);
                 setShowForm(false);
+
+                const tagsRes = await fetch("http://localhost:3001/api/tags");
+                const freshTags = await tagsRes.json();
+                setAllTags(freshTags);
+
               } catch (err) {
                 console.error("Error creating habit", err);
                 alert("Something went wrong creating the habit.");
