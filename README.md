@@ -41,7 +41,7 @@ Backend: Render, Postgresql
 
 This feature allows to use their points earned to be able to purchase items and from there it will reduce their points or give them a notifcation that shows them they have insufficent funds
 
-[stickerstore demo](featuredemo.gif)
+![stickerstore demo](featuredemo.gif)
 
 ### [ADDITIONAL FEATURES GO HERE - ADD ALL FEATURES HERE IN THE FORMAT ABOVE; you will check these off and add gifs as you complete them]
 
