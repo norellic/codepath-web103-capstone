@@ -55,7 +55,55 @@ app.get("/api/habits/by-tag/:tagName", async (req, res) => {
   }
 });
 
+// UPDATE tag
+app.put("/api/tags/:id", async (req, res) => {
+  const id = parseInt(req.params.id, 10);
+  const { name } = req.body;
 
+  if (!name || name.trim() === "") {
+    return res.status(400).json({ error: "Tag name cannot be empty" });
+  }
+
+  try {
+    const result = await db.query(
+      "UPDATE tags SET name = $1 WHERE id = $2 RETURNING *",
+      [name.trim(), id]
+    );
+
+    if (result.rowCount === 0) {
+      return res.status(404).json({ error: "Tag not found" });
+    }
+
+    return res.json(result.rows[0]);
+
+  } catch (err) {
+    console.error("Error updating tag:", err);
+    if (err.code === "23505") {
+      return res.status(409).json({ error: "Tag name already exists" });
+    }
+    return res.status(500).json({ error: "Database error" });
+  }
+});
+
+// DELETE tag
+app.delete("/api/tags/:id", async (req, res) => {
+  const { id } = req.params;
+  console.log("DELETE /api/tags/", id);
+
+  try {
+    const result = await db.query("DELETE FROM tags WHERE id = $1 RETURNING *", [id]);
+
+    if (result.rowCount === 0) {
+      return res.status(404).json({ error: "Tag not found" });
+    }
+
+    return res.status(200).json({ success: true, deletedId: parseInt(id) });
+
+  } catch (err) {
+    console.error("Error deleting tag:", err);
+    return res.status(500).json({ error: "Failed to delete tag" });
+  }
+});
 
 // ===== HABITS CRUD =====
 

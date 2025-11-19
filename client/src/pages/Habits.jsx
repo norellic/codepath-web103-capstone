@@ -15,6 +15,8 @@ export default function Habits() {
   //tags states
   const [allTags, setAllTags] = useState([]);
   const [selectedTag, setSelectedTag] = useState(null);
+  const [editingTag, setEditingTag] = useState(null);  // the tag being edited
+  const [newName, setNewName] = useState("");
 
   //standalone func since I need it in two use effect functions
   //and therefore cannot define it in either one
@@ -45,6 +47,13 @@ export default function Habits() {
     fetchTags();
   }, []);
 
+  // When a tag is selected for editing
+  useEffect(() => {
+    if (editingTag) {
+      setNewName(editingTag.name);
+    }
+  }, [editingTag]);
+
   //controls whether habit list gets filtered list or all habits
   useEffect(() => {
     async function loadFiltered() {
@@ -54,13 +63,67 @@ export default function Habits() {
       const data = await res.json();
       setHabits(data);
     }
-  
     if (selectedTag) {
       loadFiltered();
     } else {
       fetchHabits();
     }
   }, [selectedTag]);
+
+  //functions for edit tag modal
+  async function updateTag(tagId, newName) {
+    try {
+      const res = await fetch(`http://localhost:3001/api/tags/${tagId}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name: newName }),
+      });
+  
+      if (!res.ok) throw new Error("Failed to update tag");
+      
+      const updatedTag = await res.json();
+  
+      // Update local state
+      setAllTags(prev => prev.map(t => t.id === tagId ? updatedTag : t));
+      setHabits(prev => prev.map(h => ({
+        ...h,
+        tags: h.tags?.map(ht => ht.id === tagId ? updatedTag : ht) || []
+      })));
+  
+      // If currently filtered by this tag, update selectedTag name
+      if (selectedTag === editingTag.name) {
+        setSelectedTag(newName);
+      }
+    } catch (err) {
+      alert("Failed to update tag: " + err.message);
+    }
+  }
+  
+  async function deleteTag(tagId) {
+    if (!confirm("Delete this tag permanently? All habits will lose this tag.")) return;
+  
+    try {
+      const res = await fetch(`http://localhost:3001/api/tags/${tagId}`, {
+        method: "DELETE",
+      });
+  
+      if (!res.ok) throw new Error("Failed to delete tag");
+  
+      // Remove from allTags
+      setAllTags(prev => prev.filter(t => t.id !== tagId));
+  
+      // If we were filtering by this tag → clear filter
+      if (selectedTag === editingTag.name) {
+        setSelectedTag(null);
+      }
+  
+      // Refetch habits to reflect removed tag (or filter locally)
+      fetchHabits();
+    } catch (err) {
+      alert("Failed to delete tag: " + err.message);
+    }
+  }
+
 
   if (loading) {
     return <div style={{ padding: "20px" }}>Loading habits...</div>;
@@ -77,7 +140,89 @@ export default function Habits() {
         allTags={allTags}
         selectedTag={selectedTag}
         onSelectTag={setSelectedTag}
-      />  
+        onEditTag={setEditingTag}  // open modal
+      />
+
+      { /* edit tag modal */}
+      {editingTag && (
+        <div
+          style={{
+            position: "fixed",
+            inset: 0,
+            background: "rgba(0,0,0,0.4)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            zIndex: 1000,
+          }}
+          onClick={() => setEditingTag(null)}
+        >
+          <div
+            style={{
+              background: "white",
+              padding: "24px",
+              borderRadius: "12px",
+              minWidth: "320px",
+              boxShadow: "0 10px 25px rgba(0,0,0,0.2)",
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h3 style={{ margin: "0 0 16px 0" }}>Edit Tag</h3>
+
+            <input
+              type="text"
+              value={newName}
+              onChange={(e) => setNewName(e.target.value)}
+              onKeyDown={(e) => e.key === "Enter" && updateTag(editingTag.id, newName)}
+              style={{
+                width: "100%",
+                padding: "10px",
+                fontSize: "16px",
+                marginBottom: "16px",
+                borderRadius: "6px",
+                border: "1px solid #ccc",
+              }}
+              autoFocus
+            />
+
+            <div style={{ display: "flex", gap: "10px", justifyContent: "flex-end" }}>
+              <button
+                onClick={() => setEditingTag(null)}
+                style={{ padding: "8px 16px", background: "#ddd" }}
+              >
+                Cancel
+              </button>
+
+              <button
+                onClick={() => {
+                  if (newName.trim() && newName !== editingTag.name) {
+                    updateTag(editingTag.id, newName.trim());
+                  }
+                  setEditingTag(null);
+                }}
+                style={{ padding: "8px 16px", background: "#4a9ef7", color: "white" }}
+              >
+                Save
+              </button>
+
+              <button
+                onClick={() => {
+                  deleteTag(editingTag.id);
+                  setEditingTag(null);
+                }}
+                style={{
+                  padding: "8px 16px",
+                  background: "#f44",
+                  color: "white",
+                  marginLeft: "auto",
+                }}
+              >
+                Delete Tag
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       { /* habit form*/}
       <button onClick={() => setShowForm(true)} style={{ marginBottom: "10px" }}>
