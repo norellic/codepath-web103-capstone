@@ -50,4 +50,5 @@ This feature allows to use their points earned to be able to purchase items and 
 - First git clone the repo
 - Once done npm install inside the client directory
 - npm run reset in the server directory
+  - npm run start in the server directory
 - npm run dev in client directory
