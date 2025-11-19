@@ -104,15 +104,22 @@ const reset = async () => {
     `);
 
     // minimal seed: 1 user + 1 tag + 1 sticker (for testing UI)
-    await pool.query(`
-      INSERT INTO users (username, password, points)
-      VALUES ('demo', '$2b$10$examplehash', 0)
-      ON CONFLICT DO NOTHING;
 
-      INSERT INTO tags (name) VALUES ('sample') ON CONFLICT DO NOTHING;
-      INSERT INTO stickers (name, price, image_url)
-      VALUES ('Sample Sticker', 10, NULL) ON CONFLICT DO NOTHING;
-    `);
+    await pool.query(`
+    INSERT INTO users (username, password, points)
+    VALUES ('demo', '$2b$10$examplehash', 50)
+    ON CONFLICT (username) DO UPDATE
+      SET points = EXCLUDED.points;
+
+    INSERT INTO tags (name) VALUES ('edit this tag') ON CONFLICT DO NOTHING;
+
+    -- global store stickers
+    INSERT INTO stickers (name, price, image_url) VALUES
+      ('Gold Star', 50, 'https://media.istockphoto.com/id/1457587098/vector/sticker-of-a-cute-cartoon-gold-star.jpg?s=612x612&w=0&k=20&c=QGPV_wTT2GLRJ2JoFa1cS8qRId4dLi9TKq6XP76mMyE='),
+      ('Flame',     75, 'https://dejpknyizje2n.cloudfront.net/media/carstickers/versions/large-flame-sticker-u9940-x450.png'),
+      ('Rocket',   120, 'https://dejpknyizje2n.cloudfront.net/media/carstickers/versions/cartoon-spaceship-rocket-sticker-u0e4d-x450.png')
+    ON CONFLICT (name) DO NOTHING;
+`);
 
     console.log('✅ schema reset; minimal seed inserted');
   } finally {
