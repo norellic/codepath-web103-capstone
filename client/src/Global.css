@@ -1,0 +1,30 @@
+body {
+  margin: 0;
+  padding: 0;
+  background: url("./assets/background.png") no-repeat center center fixed;
+  background-size: cover;
+  background-attachment: fixed;
+  font-family: sans-serif;
+}
+
+.app-surface {
+  min-height: 100vh;
+  padding: 20px;
+  
+  background: rgba(255, 255, 255, 0.55);   
+  backdrop-filter: blur(14px);             
+  -webkit-backdrop-filter: blur(14px);
+}
+
+.page-container {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.content-box {
+  background: rgba(255, 255, 255, 0.9);
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+}

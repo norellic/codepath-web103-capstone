@@ -25,13 +25,13 @@ Backend: Render, Postgresql
 
 ## Features
 
-### [Name of Feature 1]
+### View and manage your habits
 
 [short description goes here]
 
 [gif goes here]
 
-### [Name of Feature 2]
+### Start a timer for habit sessions
 
 [short description goes here]
 

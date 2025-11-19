@@ -1,4 +1,3 @@
-// client/src/pages/TimerView.jsx
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useUser } from "../UserContext";   // whatever file you put UserContext in

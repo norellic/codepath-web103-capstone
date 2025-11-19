@@ -1,0 +1,50 @@
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 20px;
+  border-bottom: 1px solid #ccc;
+  margin-bottom: 20px;
+}
+
+.nav-link-btn {
+  background: none;
+  border: none;
+  color: #333;
+  font-size: 1rem;
+  cursor: pointer;
+  padding: 6px 8px;
+  text-decoration: none;
+  transition: 0.2s;
+}
+
+.nav-link-btn:hover {
+  background-color: #0074ff;
+}
+
+.nav-group {
+  display: flex;
+  gap: 12px;
+}
+
+.points {
+  font-weight: bold;
+}
+
+.icon-btn {
+  background: none;
+  border: none;
+  padding: 6px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+}
+
+.icon-btn:hover .info-icon {
+  opacity: 0.75;
+}
+
+.info-icon {
+  width: 22px;  
+  height: 22px;
+}

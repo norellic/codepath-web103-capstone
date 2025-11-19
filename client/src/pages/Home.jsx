@@ -1,4 +1,3 @@
-// client/src/pages/Home.jsx
 import { useUser } from "../UserContext";
 
 export default function Home() {
