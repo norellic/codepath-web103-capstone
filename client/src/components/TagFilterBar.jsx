@@ -1,28 +1,27 @@
-import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
-
-export default function TagFilterBar({ tags }) {
-  const navigate = useNavigate();
-
+export default function TagFilterBar({ allTags, selectedTag, onSelectTag }) {
   return (
-    <div
-      style={{
-        display: "flex",
-        gap: "0.5rem",
-        marginBottom: "1rem",
-        flexWrap: "wrap",
-      }}
-    >
-      {tags.map((tag) => (
+    <div style={{ display: "flex", gap: "0.5rem", marginBottom: "1rem" }}>
+      {/* Clear Button */}
+      <button
+        onClick={() => onSelectTag(null)}
+        style={{
+          backgroundColor: selectedTag ? "#ddd" : "#aaa",
+          padding: "0.5rem 1rem",
+        }}
+      >
+        All
+      </button>
+
+      {/* Tag Buttons */}
+      {allTags.map(tag => (
         <button
           key={tag.id}
-          onClick={() => navigate(`/tags/${tag.name}`)}
+          onClick={() =>
+            onSelectTag(prev => (prev === tag.name ? null : tag.name))
+          }
           style={{
             padding: "0.5rem 1rem",
-            borderRadius: "8px",
-            border: "1px solid #ccc",
-            background: "#eee",
-            cursor: "pointer",
+            backgroundColor: selectedTag === tag.name ? "#8af" : "#eef",
           }}
         >
           {tag.name}

@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import HabitForm from "../components/HabitForm";
 import TagFilterBar from "../components/TagFilterBar";
+import HabitForm from "../components/HabitForm";
+import HabitList from "../components/HabitList";
 
 export default function Habits() {
   const navigate = useNavigate();
@@ -15,6 +16,25 @@ export default function Habits() {
   const [allTags, setAllTags] = useState([]);
   const [selectedTag, setSelectedTag] = useState(null);
 
+  //standalone func since I need it in two use effect functions
+  //and therefore cannot define it in either one
+  async function fetchHabits() {
+    try {
+      const res = await fetch("http://localhost:3001/api/habits");
+      const data = await res.json();
+      setHabits(data);
+    } catch (err) {
+      console.error("Failed to load habits", err);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  //fetch all habits
+  useEffect(() => {
+    fetchHabits();
+  }, []);
+
   //fetch all user tags
   useEffect(() => {
     async function fetchTags() {
@@ -25,28 +45,27 @@ export default function Habits() {
     fetchTags();
   }, []);
 
-  //fetch all habits
+  //controls whether habit list gets filtered list or all habits
   useEffect(() => {
-    async function fetchHabits() {
-      try {
-        const res = await fetch("http://localhost:3001/api/habits");
-        const data = await res.json();
-        setHabits(data);
-      } catch (err) {
-        console.error("Failed to load habits", err);
-      } finally {
-        setLoading(false);
-      }
+    async function loadFiltered() {
+      if (!selectedTag) return; // no filter → show all
+  
+      const res = await fetch(`http://localhost:3001/api/habits/by-tag/${selectedTag}`);
+      const data = await res.json();
+      setHabits(data);
     }
-
-    fetchHabits();
-  }, []);
+  
+    if (selectedTag) {
+      loadFiltered();
+    } else {
+      fetchHabits();
+    }
+  }, [selectedTag]);
 
   if (loading) {
     return <div style={{ padding: "20px" }}>Loading habits...</div>;
   }
-
-  //habit form
+ 
   return (
 
     <div style={{ padding: "20px" }}>
@@ -54,8 +73,13 @@ export default function Habits() {
       <h1>Your Habits</h1>
       <p>Track and manage your daily habits here!</p>
 
-      <TagFilterBar tags={allTags} />
+      <TagFilterBar
+        allTags={allTags}
+        selectedTag={selectedTag}
+        onSelectTag={setSelectedTag}
+      />  
 
+      { /* habit form*/}
       <button onClick={() => setShowForm(true)} style={{ marginBottom: "10px" }}>
         +
       </button>
@@ -92,33 +116,12 @@ export default function Habits() {
         </div>
       )}
 
-      {/* this displays previous habits*/}
-      <ul style={{ listStyle: "none", padding: 0 }}>
-        {habits.length === 0 && <li>No habits yet.</li>}
-
-        {habits.map((h) => (
-          <li
-            key={h.id}
-            onClick={() => navigate(`/habit/${h.id}`, { state: { habit: h } })}
-            style={{
-              padding: "10px",
-              margin: "10px 0",
-              border: "1px solid #ccc",
-              borderRadius: "5px",
-              cursor: "pointer",
-            }}
-          >
-            <strong>{h.title}</strong> – {h.description || "No description"}
-            <br />
-            <small>
-              Created:{" "}
-              {h.created_at
-                ? new Date(h.created_at).toLocaleString()
-                : "Unknown"}
-            </small>
-          </li>
-        ))}
-      </ul>
+      <HabitList
+        habits={habits}
+        onSelect={(habit) =>
+          navigate(`/habit/${habit.id}`, { state: { habit } })
+        }
+      />
     </div>
   );
 }
