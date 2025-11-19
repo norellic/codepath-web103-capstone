@@ -3,10 +3,13 @@ import { createContext, useContext, useState } from "react";
 const UserContext = createContext(null);
 
 export function UserProvider({ children }) {
-  const [points, setPoints] = useState(0); // start at 0
+  const [points, setPoints] = useState(50); 
+  const [purchasedStickers, setPurchasedStickers] = useState([]); 
 
   return (
-    <UserContext.Provider value={{ points, setPoints }}>
+    <UserContext.Provider
+      value={{ points, setPoints, purchasedStickers, setPurchasedStickers }}
+    >
       {children}
     </UserContext.Provider>
   );
