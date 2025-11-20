@@ -2,18 +2,25 @@
 import "dotenv/config";
 import express from "express";
 import cors from "cors";
+import path from "path";                 // ⭐ NEW
+import { fileURLToPath } from "url";     // ⭐ NEW
+
 import { pool as db } from "./config/database.js";
 import { initDb } from "./db/init.js";
 import storeRoutes from "./routes/storeRoutes.js";
-import "dotenv/config";
-
 
 const app = express();
-
 app.use(cors());
 app.use(express.json());
 
 const PORT = process.env.PORT || 3001;
+
+// ⭐ NEW: Resolve paths correctly in ES modules
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+// ⭐ NEW: Path to React build folder (client/dist)
+const clientDistPath = path.join(__dirname, "..", "client", "dist");
 
 // ===== TAGS CRUD =====
 
@@ -24,14 +31,18 @@ app.get("/api/tags", async (req, res) => {
 });
 
 // GET tags for a habit id
-app.get("/api/tags/:id", async (req, res) => { 
+app.get("/api/tags/:id", async (req, res) => {
   const { id } = req.params;
-  const result = await db.query(`
-  SELECT tags.id, tags.name 
-  FROM tags 
-  JOIN habit_tags ON tags.id = habit_tags.tag_id
-  WHERE habit_id = $1`, [id]);
-  res.json(result.rows)
+  const result = await db.query(
+    `
+    SELECT tags.id, tags.name 
+    FROM tags 
+    JOIN habit_tags ON tags.id = habit_tags.tag_id
+    WHERE habit_id = $1
+    `,
+    [id]
+  );
+  res.json(result.rows);
 });
 
 // GET all habits for a tag id
@@ -51,7 +62,7 @@ app.get("/api/habits/by-tag/:tagName", async (req, res) => {
       [tagName]
     );
 
-    res.json(result.rows); // array
+    res.json(result.rows);
   } catch (err) {
     console.error("Error fetching habits by tag:", err);
     res.status(500).json({ error: err.message });
@@ -78,7 +89,6 @@ app.put("/api/tags/:id", async (req, res) => {
     }
 
     return res.json(result.rows[0]);
-
   } catch (err) {
     console.error("Error updating tag:", err);
     if (err.code === "23505") {
@@ -94,14 +104,16 @@ app.delete("/api/tags/:id", async (req, res) => {
   console.log("DELETE /api/tags/", id);
 
   try {
-    const result = await db.query("DELETE FROM tags WHERE id = $1 RETURNING *", [id]);
+    const result = await db.query(
+      "DELETE FROM tags WHERE id = $1 RETURNING *",
+      [id]
+    );
 
     if (result.rowCount === 0) {
       return res.status(404).json({ error: "Tag not found" });
     }
 
     return res.status(200).json({ success: true, deletedId: parseInt(id) });
-
   } catch (err) {
     console.error("Error deleting tag:", err);
     return res.status(500).json({ error: "Failed to delete tag" });
@@ -123,7 +135,7 @@ app.get("/api/habits", async (req, res) => {
   }
 });
 
-// CREATE habit + habit's tags
+// CREATE habit + tags
 app.post("/api/habits", async (req, res) => {
   const { title, description, user_id, tags } = req.body;
 
@@ -134,7 +146,6 @@ app.post("/api/habits", async (req, res) => {
   const effectiveUserId = user_id ?? 1; // demo user id
 
   try {
-    // 1. create habit
     const habitResult = await db.query(
       `INSERT INTO habits (user_id, title, description)
        VALUES ($1, $2, $3)
@@ -144,12 +155,10 @@ app.post("/api/habits", async (req, res) => {
 
     const habit = habitResult.rows[0];
 
-    // 2. If no tags, return early
     if (!tags || tags.length === 0) {
       return res.status(201).json(habit);
     }
 
-    // 3. Insert tags (create if not exists)
     const tagIds = [];
 
     for (const tagName of tags) {
@@ -164,7 +173,6 @@ app.post("/api/habits", async (req, res) => {
       tagIds.push(tagResult.rows[0].id);
     }
 
-    // 4. Insert habit_tags relational entries
     for (const tagId of tagIds) {
       await db.query(
         `INSERT INTO habit_tags (habit_id, tag_id)
@@ -174,20 +182,17 @@ app.post("/api/habits", async (req, res) => {
       );
     }
 
-    // 5. Return habit with tags
     return res.status(201).json({
       ...habit,
       tags: tagIds,
     });
-
   } catch (err) {
     console.error("Error creating habit:", err);
     return res.status(500).json({ error: err.message });
   }
 });
 
-
-// GET single habit by id
+// GET single habit
 app.get("/api/habits/:id", async (req, res) => {
   const { id } = req.params;
 
@@ -214,18 +219,14 @@ app.put("/api/habits/:id", async (req, res) => {
   const { id } = req.params;
 
   try {
-    // update habit
     await db.query(
       "UPDATE habits SET title=$1, description=$2 WHERE id=$3",
       [title, description, id]
     );
 
-    // delete old tags
     await db.query("DELETE FROM habit_tags WHERE habit_id=$1", [id]);
 
-    // insert new tags
     for (let tagName of tags) {
-      // insert tag if not exists
       const tagRes = await db.query(
         "INSERT INTO tags(name) VALUES($1) ON CONFLICT (name) DO UPDATE SET name=EXCLUDED.name RETURNING id",
         [tagName]
@@ -243,7 +244,6 @@ app.put("/api/habits/:id", async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 });
-
 
 // DELETE habit
 app.delete("/api/habits/:id", async (req, res) => {
@@ -266,7 +266,6 @@ app.delete("/api/habits/:id", async (req, res) => {
 });
 
 // ===== TIMER COMPLETE -> POINTS =====
-
 app.post("/api/habits/:id/complete", async (req, res) => {
   const habitId = req.params.id;
   const { minutes } = req.body;
@@ -283,7 +282,6 @@ app.post("/api/habits/:id/complete", async (req, res) => {
         .json({ error: "Timer minutes must be a positive number." });
     }
 
-    // habit must exist
     const habitResult = await db.query(
       "SELECT id FROM habits WHERE id = $1",
       [habitId]
@@ -293,7 +291,6 @@ app.post("/api/habits/:id/complete", async (req, res) => {
       return res.status(404).json({ error: "Habit not found" });
     }
 
-    // update user points
     const userResult = await db.query(
       "UPDATE users SET points = COALESCE(points, 0) + $1 WHERE id = $2 RETURNING points",
       [pointsEarned, userId]
@@ -315,9 +312,12 @@ app.post("/api/habits/:id/complete", async (req, res) => {
 
 // ===== STICKER STORE ROUTES =====
 app.use("/api", storeRoutes);
+app.use(express.static(clientDistPath));
+app.get("*", (req, res) => {
+  res.sendFile(path.join(clientDistPath, "index.html"));
+});
 
 // ===== START SERVER AFTER DB INIT =====
-
 async function start() {
   try {
     await initDb(); // ensures tables + demo user
