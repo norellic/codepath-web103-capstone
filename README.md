@@ -27,21 +27,21 @@ Backend: Render, Postgresql
 
 ### View and manage your habits
 
-[short description goes here]
+This feature allows for users to create,edit, delete, and organize their habits by putting different tags to be able to filter what habit is associate with what aspect of life they are trying to improve.
 
-[gif goes here]
+![stickerstore demo](manageHabits.gif)
 
 ### Start a timer for habit sessions
 
-[short description goes here]
+This feature allows for users to set their own timer to be able to get points to spend in the store, it will increase their current score and recieve 1 point per minute focused.
 
-[gif goes here]
+![stickerstore demo](timerHabit.gif)
 
 ### Sticker Store
 
 This feature allows to use their points earned to be able to purchase items and from there it will reduce their points or give them a notifcation that shows them they have insufficent funds
 
-![stickerstore demo](featuredemo.gif)
+![stickerstore demo](purchaseSticker.gif)
 
 ### [ADDITIONAL FEATURES GO HERE - ADD ALL FEATURES HERE IN THE FORMAT ABOVE; you will check these off and add gifs as you complete them]
 
