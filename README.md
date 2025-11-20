@@ -41,7 +41,7 @@ This feature allows for users to set their own timer to be able to get points to
 
 This feature allows to use their points earned to be able to purchase items and from there it will reduce their points or give them a notifcation that shows them they have insufficent funds
 
-![stickerstore demo](purchaseSticker.gif)
+![stickerstore demo](pruchaseSticker.gif)
 
 ### [ADDITIONAL FEATURES GO HERE - ADD ALL FEATURES HERE IN THE FORMAT ABOVE; you will check these off and add gifs as you complete them]
 
