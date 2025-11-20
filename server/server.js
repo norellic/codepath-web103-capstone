@@ -313,7 +313,7 @@ app.post("/api/habits/:id/complete", async (req, res) => {
 // ===== STICKER STORE ROUTES =====
 app.use("/api", storeRoutes);
 app.use(express.static(clientDistPath));
-app.get("*", (req, res) => {
+app.get("/*", (req, res) => {
   res.sendFile(path.join(clientDistPath, "index.html"));
 });
 
